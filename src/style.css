@@ -1,0 +1,16 @@
+.timeline {
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+}
+
+.timeline-node {
+  padding: 10px;
+  border: 1px solid #ccc;
+  margin-bottom: 5px;
+  cursor: pointer;
+}
+
+.tweet-container {
+  margin-top: 20px;
+}
