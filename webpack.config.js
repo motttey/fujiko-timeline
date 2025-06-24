@@ -1,9 +1,10 @@
 const path = require('path');
 const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   mode: 'development',
-  entry: './src/index.ts',
+  entry: './src/index.tsx',
   devtool: 'inline-source-map',
   devServer: {
     static: './dist',
@@ -30,5 +31,8 @@ module.exports = {
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
+    new HtmlWebpackPlugin({
+      template: './index.html',
+    }),
   ],
 };
