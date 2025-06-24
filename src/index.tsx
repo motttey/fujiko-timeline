@@ -1,36 +1,71 @@
-import React, { useState } from "react";
+declare global {
+  interface Window {
+    twttr?: {
+      widgets: {
+        load: () => void;
+      };
+    };
+  }
+}
+
+import React, { useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
 
 const timelineData = [
-  { id: 1, date: "2025-01-01", text: "Event 1", tweetId: "1609876543210987654" },
-  { id: 2, date: "2025-02-15", text: "Event 2", tweetId: "1612345678901234567" },
-  { id: 3, date: "2025-03-20", text: "Event 3", tweetId: "1623456789012345678" },
+  {
+    id: 1,
+    date: "2025-06-24",
+    text: "ポスト1",
+    url: "https://twitter.com/mt_tg/status/1936411081070858243",
+  },
+  {
+    id: 2,
+    date: "2025-06-24",
+    text: "ポスト2",
+    url: "https://twitter.com/mt_tg/status/1937472607395438932",
+  },
+  {
+    id: 3,
+    date: "2025-06-24",
+    text: "ポスト3",
+    url: "https://twitter.com/mt_tg/status/1936601492926112120",
+  },
 ];
 
+const loadTwitterScript = () => {
+  if (window.twttr) {
+    window.twttr.widgets.load();
+    return;
+  }
+  const script = document.createElement("script");
+  script.src = "https://platform.twitter.com/widgets.js";
+  script.async = true;
+  document.body.appendChild(script);
+};
+
 const Timeline: React.FC = () => {
-  const [activeTweetId, setActiveTweetId] = useState<string | null>(null);
+  useEffect(() => {
+    loadTwitterScript();
+  }, []);
+
+  useEffect(() => {
+    if (window.twttr) {
+      window.twttr.widgets.load();
+    }
+  });
 
   return (
     <div>
       <div className="timeline">
         {timelineData.map((item) => (
-          <div
-            key={item.id}
-            className="timeline-node"
-            onMouseOver={() => setActiveTweetId(item.tweetId)}
-            onMouseOut={() => setActiveTweetId(null)}
-          >
-            {item.text}
+          <div key={item.id} className="timeline-node">
+            <div>{item.text}</div>
+            <blockquote className="twitter-tweet">
+              <a href={item.url}></a>
+            </blockquote>
           </div>
         ))}
-      </div>
-      <div className="tweet-container">
-        {activeTweetId && (
-          <blockquote className="twitter-tweet">
-            <a href={`https://twitter.com/twitterdev/status/${activeTweetId}`}></a>
-          </blockquote>
-        )}
       </div>
     </div>
   );
