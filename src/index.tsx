@@ -8,7 +8,7 @@ declare global {
   }
 }
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
 
@@ -45,6 +45,8 @@ const loadTwitterScript = () => {
 };
 
 const Timeline: React.FC = () => {
+  const [hoveredId, setHoveredId] = useState<number | null>(null);
+
   useEffect(() => {
     loadTwitterScript();
   }, []);
@@ -56,14 +58,23 @@ const Timeline: React.FC = () => {
   });
 
   return (
-    <div>
-      <div className="timeline">
-        {timelineData.map((item) => (
-          <div key={item.id} className="timeline-node">
-            <div>{item.text}</div>
-            <blockquote className="twitter-tweet">
-              <a href={item.url}></a>
-            </blockquote>
+    <div className="timeline-container">
+      <div className="timeline-vertical-line">
+        {timelineData.map((item, idx) => (
+          <div
+            key={item.id}
+            className="timeline-node-wrapper"
+            onMouseEnter={() => setHoveredId(item.id)}
+            onMouseLeave={() => setHoveredId(null)}
+          >
+            <div className="timeline-node" />
+            {hoveredId === item.id && (
+              <div className={`timeline-bubble ${idx % 2 === 0 ? "left" : "right"}`}>
+                <blockquote className="twitter-tweet">
+                  <a href={item.url}></a>
+                </blockquote>
+              </div>
+            )}
           </div>
         ))}
       </div>
