@@ -13,10 +13,10 @@ import { createRoot } from "react-dom/client";
 import * as d3 from "d3";
 import "./style.css";
 
-// 日付を分散させたサンプルデータ
+// 年ごとに分散したダミーデータ（同じ年に複数データあり）
 type TimelineItem = {
   id: number;
-  date: string;
+  date: string; // "YYYY-MM-DD"
   text: string;
   url: string;
 };
@@ -24,33 +24,63 @@ type TimelineItem = {
 const timelineData: TimelineItem[] = [
   {
     id: 1,
-    date: "2025-06-24",
-    text: "ポスト1",
+    date: "2022-03-15",
+    text: "2022年のポスト1",
     url: "https://twitter.com/mt_tg/status/1936411081070858243",
   },
   {
     id: 2,
-    date: "2025-06-25",
-    text: "ポスト2",
+    date: "2022-07-20",
+    text: "2022年のポスト2",
     url: "https://twitter.com/mt_tg/status/1937472607395438932",
   },
   {
     id: 3,
-    date: "2025-06-26",
-    text: "ポスト3",
+    date: "2023-01-10",
+    text: "2023年のポスト1",
     url: "https://twitter.com/mt_tg/status/1936601492926112120",
   },
   {
     id: 4,
-    date: "2025-06-27",
-    text: "ポスト4",
-    url: "https://twitter.com/mt_tg/status/1938254573501878356",
+    date: "2023-05-05",
+    text: "2023年のポスト2",
+    url: "https://twitter.com/mt_tg/status/1936601492926112120",
   },
   {
     id: 5,
-    date: "2025-06-28",
-    text: "ポスト5",
-    url: "https://twitter.com/mt_tg/status/1938894001379385441",
+    date: "2023-12-25",
+    text: "2023年のポスト3",
+    url: "https://twitter.com/mt_tg/status/1936601492926112120",
+  },
+  {
+    id: 6,
+    date: "2024-02-14",
+    text: "2024年のポスト1",
+    url: "https://twitter.com/mt_tg/status/1936601492926112120",
+  },
+  {
+    id: 7,
+    date: "2024-08-30",
+    text: "2024年のポスト2",
+    url: "https://twitter.com/mt_tg/status/1936601492926112120",
+  },
+  {
+    id: 8,
+    date: "2025-04-01",
+    text: "2025年のポスト1",
+    url: "https://twitter.com/mt_tg/status/1936601492926112120",
+  },
+  {
+    id: 9,
+    date: "2025-09-09",
+    text: "2025年のポスト2",
+    url: "https://twitter.com/mt_tg/status/1936601492926112120",
+  },
+  {
+    id: 10,
+    date: "2025-09-09",
+    text: "2025年のポスト3",
+    url: "https://twitter.com/mt_tg/status/1936601492926112120",
   },
 ];
 
@@ -71,34 +101,31 @@ const Timeline: React.FC = () => {
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
 
-  // D3でタイムライン描画
   useEffect(() => {
     const margin = { top: 40, right: 40, bottom: 40, left: 80 };
-    const width = 400;
-    const height = 500;
+    const height = 600;
 
     // SVG初期化
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
-    // 日付を昇順でソート
-    const data = [...timelineData].sort((a, b) => a.date.localeCompare(b.date));
+    // 年リストを抽出し昇順ソート
+    const years = Array.from(
+      new Set(timelineData.map((d) => d.date.slice(0, 4)))
+    ).sort();
 
-    // yスケール（日付→位置）
-    const dates = Array.from(new Set(data.map((d) => d.date)));
+    // yスケール（年→位置）
     const yScale = d3
-      .scalePoint()
-      .domain(dates)
+      .scalePoint<string>()
+      .domain(years)
       .range([margin.top, height - margin.bottom])
       .padding(0.5);
 
-    // y軸
     svg
       .append("g")
       .attr("transform", `translate(${margin.left},0)`)
       .call(d3.axisLeft(yScale));
 
-    // タイムライン線
     svg
       .append("line")
       .attr("x1", margin.left)
@@ -108,35 +135,45 @@ const Timeline: React.FC = () => {
       .attr("stroke", "#aaa")
       .attr("stroke-width", 2);
 
+    // 年ごとにデータをグループ化
+    const grouped = d3.group(timelineData, (d) => d.date.slice(0, 4));
+
     // ドット描画
-    svg
-      .selectAll<SVGCircleElement, TimelineItem>("circle.timeline-dot")
-      .data(data)
-      .enter()
-      .append("circle")
-      .attr("class", "timeline-dot")
-      .attr("cx", margin.left)
-      .attr("cy", (d: TimelineItem) => yScale(d.date)!)
-      .attr("r", 10)
-      .attr("fill", "#1da1f2")
-      .attr("stroke", "#fff")
-      .attr("stroke-width", 2)
-      .style("cursor", "pointer")
-      .on("mouseenter", function (event: MouseEvent, d: TimelineItem) {
-        setHoveredId(d.id);
-        // SVG座標を取得してポップアップ位置に使う
-        const rect = svgRef.current?.getBoundingClientRect();
-        if (rect) {
-          setHoverPos({
-            x: rect.left + margin.left,
-            y: rect.top + yScale(d.date)!,
+    let dotRadius = 10;
+    let dotGap = 24;
+    grouped.forEach((items, year) => {
+      const y = yScale(year)!;
+      const n = items.length;
+      // 横方向の中心をmargin.left、左右に等間隔で配置
+      items.forEach((item, i) => {
+        // -1, 0, 1, ... で中央揃え
+        const offset = (i - (n - 1) / 2) * dotGap;
+        svg
+          .append("circle")
+          .attr("class", "timeline-dot")
+          .attr("cx", margin.left + offset)
+          .attr("cy", y)
+          .attr("r", dotRadius)
+          .attr("fill", "#1da1f2")
+          .attr("stroke", "#fff")
+          .attr("stroke-width", 2)
+          .style("cursor", "pointer")
+          .on("mouseenter", function (event: MouseEvent) {
+            setHoveredId(item.id);
+            const rect = svgRef.current?.getBoundingClientRect();
+            if (rect) {
+              setHoverPos({
+                x: rect.left + margin.left + offset,
+                y: rect.top + y,
+              });
+            }
+          })
+          .on("mouseleave", function () {
+            setHoveredId(null);
+            setHoverPos(null);
           });
-        }
-      })
-      .on("mouseleave", function () {
-        setHoveredId(null);
-        setHoverPos(null);
       });
+    });
   }, []);
 
   // Twitter埋め込みスクリプトのロード
@@ -155,8 +192,8 @@ const Timeline: React.FC = () => {
   const hoveredData = timelineData.find((d) => d.id === hoveredId);
 
   return (
-    <div style={{ position: "relative", width: 400, height: 500, margin: "0 auto" }}>
-      <svg ref={svgRef} width={400} height={500} />
+    <div style={{ position: "relative", width: 500, height: 600, margin: "0 auto" }}>
+      <svg ref={svgRef} width={500} height={600} />
       {hoveredData && hoverPos && (
         <div
           style={{
