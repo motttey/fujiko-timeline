@@ -102,7 +102,7 @@ const Timeline: React.FC = () => {
   const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
-    const margin = { top: 40, right: 40, bottom: 40, left: 80 };
+    const margin = { top: 40, right: 40, bottom: 40, left: 240 };
     const height = 600;
 
     // SVG初期化
@@ -121,33 +121,59 @@ const Timeline: React.FC = () => {
       .range([margin.top, height - margin.bottom])
       .padding(0.5);
 
+    // 年ラベル用のカスタム軸
     svg
       .append("g")
-      .attr("transform", `translate(${margin.left},0)`)
-      .call(d3.axisLeft(yScale));
+      .attr("transform", `translate(${margin.left / 2},0)`)
+      .call(
+        d3
+          .axisLeft(yScale)
+          .tickSize(0)
+          .tickPadding(16)
+      )
+      .call((g) =>
+        g
+          .selectAll(".tick text")
+          .attr("font-size", "2.1rem")
+          .attr("font-weight", "bold")
+          .attr("fill", "#222")
+          .attr("font-family", "'Noto Sans JP', 'Helvetica Neue', Arial, sans-serif")
+          .attr("opacity", 0.92)
+      )
+      .call((g) => g.selectAll(".domain").remove());
 
+    // タイムライン縦線
     svg
       .append("line")
       .attr("x1", margin.left)
       .attr("x2", margin.left)
       .attr("y1", margin.top)
       .attr("y2", height - margin.bottom)
-      .attr("stroke", "#aaa")
-      .attr("stroke-width", 2);
+      .attr("stroke", "#fff")
+      .attr("stroke-width", 6)
+      .attr("opacity", 0.85)
+      .attr("filter", "url(#timeline-shadow)");
+
+    // 縦線用の影フィルタ
+    svg
+      .append("defs")
+      .html(`
+        <filter id="timeline-shadow" x="-50%" y="-50%" width="200%" height="200%">
+          <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#0096d6" flood-opacity="0.18"/>
+        </filter>
+      `);
 
     // 年ごとにデータをグループ化
     const grouped = d3.group(timelineData, (d) => d.date.slice(0, 4));
 
     // ドット描画
-    let dotRadius = 10;
-    let dotGap = 24;
+    let dotRadius = 13;
+    let dotGap = 36;
     grouped.forEach((items, year) => {
       const y = yScale(year)!;
       const n = items.length;
-      // 横方向の中心をmargin.left、左右に等間隔で配置
       items.forEach((item, i) => {
-        // -1, 0, 1, ... で中央揃え
-        const offset = (i - (n - 1) / 2) * dotGap;
+        const offset = i * dotGap;
         svg
           .append("circle")
           .attr("class", "timeline-dot")
