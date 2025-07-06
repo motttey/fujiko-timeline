@@ -12,7 +12,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import * as d3 from "d3";
 import "./style.css";
-import { timelineData } from "./data/timeline1";
+import { timelineData, TimelineItem } from "./data/timeline1";
 
 // Twitter埋め込みスクリプト
 const loadTwitterScript = () => {
@@ -25,6 +25,9 @@ const loadTwitterScript = () => {
   script.async = true;
   document.body.appendChild(script);
 };
+
+const dotRadius = 13;
+const dotGap = 36;
 
 const Timeline: React.FC = () => {
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -67,49 +70,91 @@ const Timeline: React.FC = () => {
     svg
       .append("line")
       .attr("class", "verticalLine")
-      .attr("x1", margin.left)
-      .attr("x2", margin.left)
+      .attr("x1", margin.left - dotGap)
+      .attr("x2", margin.left - dotGap)
       .attr("y1", margin.top)
       .attr("y2", height - margin.bottom)
       .attr("stroke", "#fff")
       .attr("stroke-width", 6)
       .attr("opacity", 0.85);
 
-    // 年ごとにデータをグループ化
-    const grouped = d3.group(timelineData, (d) => d.date.slice(0, 4));
+    // 年ごとにデータをグループ化し、さらに work ごとにグループ化
+    const groupedByYear = d3.group(timelineData, (d) => d.date.slice(0, 4));
 
-    // ドット描画
-    let dotRadius = 13;
-    let dotGap = 36;
-    grouped.forEach((items, year) => {
-      const y = yScale(year)!;
-      const n = items.length;
-      items.forEach((item, i) => {
-        const offset = i * dotGap;
+    // y軸の行数を計算するために、yearごとにworkでグループ化
+    const groupedByYearAndWork = new Map<string, Map<string, TimelineItem[]>>();
+    groupedByYear.forEach((items, year) => {
+      const workMap = d3.group(items, (d) => d.work);
+      groupedByYearAndWork.set(year, workMap);
+    });
+
+    // y軸の行数を計算
+    let totalRows = 0;
+    groupedByYearAndWork.forEach((workMap) => {
+      totalRows += workMap.size;
+    });
+
+    // yスケールを行数に合わせて再設定
+    const yScaleMulti = d3
+      .scalePoint<string>()
+      .domain(
+        Array.from(groupedByYearAndWork.entries()).flatMap(([year, workMap]) =>
+          Array.from(workMap.keys()).map((work) => `${year}-${work}`)
+        )
+      )
+      .range([margin.top, height - margin.bottom])
+      .padding(0.5);
+
+    groupedByYearAndWork.forEach((workMap, year) => {
+      workMap.forEach((items, work) => {
+        const y = yScaleMulti(`${year}-${work}`)!;
+
+        // ドット描画（改行対応）
+        const maxDotsPerLine = Math.floor((500 - margin.left) / dotGap);
+        items.forEach((item, i) => {
+          const lineIndex = Math.floor(i / maxDotsPerLine);
+          const posInLine = i % maxDotsPerLine;
+          const offsetX = posInLine * dotGap;
+          const offsetY = lineIndex * (dotRadius * 2 + 10);
+          svg
+            .append("circle")
+            .attr("class", "timeline-dot")
+            .attr("cx", margin.left + offsetX)
+            .attr("cy", y + offsetY)
+            .attr("r", dotRadius)
+            .attr("fill", "#1da1f2")
+            .attr("stroke", "#fff")
+            .attr("stroke-width", 2)
+            .style("cursor", "pointer")
+            .on("mouseenter", function (_event: MouseEvent) {
+              setHoveredId(item.id);
+              const rect = svgRef.current?.getBoundingClientRect();
+              if (rect) {
+                setHoverPos({
+                  x: rect.left + margin.left + offsetX,
+                  y: rect.top + y + offsetY,
+                });
+              }
+            })
+            .on("mouseleave", function () {
+              setHoveredId(null);
+              setHoverPos(null);
+            });
+        });
+
+        // workラベル表示（dotの右上に表示、複数行の場合はマージン調整）
+        const labelX = margin.left - dotGap/2;
+        const labelY = y - dotGap; // dotの上に表示するため少し上にずらす
         svg
-          .append("circle")
-          .attr("class", "timeline-dot")
-          .attr("cx", margin.left + offset)
-          .attr("cy", y)
-          .attr("r", dotRadius)
-          .attr("fill", "#1da1f2")
-          .attr("stroke", "#fff")
-          .attr("stroke-width", 2)
-          .style("cursor", "pointer")
-          .on("mouseenter", function (event: MouseEvent) {
-            setHoveredId(item.id);
-            const rect = svgRef.current?.getBoundingClientRect();
-            if (rect) {
-              setHoverPos({
-                x: rect.left + margin.left + offset,
-                y: rect.top + y,
-              });
-            }
-          })
-          .on("mouseleave", function () {
-            setHoveredId(null);
-            setHoverPos(null);
-          });
+          .append("text")
+          .attr("class", "work-label")
+          .attr("x", labelX)
+          .attr("y", labelY)
+          .attr("text-anchor", "start")
+          .attr("alignment-baseline", "middle")
+          .attr("fill", "#fff")
+          .attr("font-weight", "bold")
+          .text(work);
       });
     });
   }, []);
