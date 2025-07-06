@@ -129,3 +129,24 @@ body {
   background: none;
   border: none;
 }
+
+/* D3 軸の目盛りテキストスタイル */
+.tick text {
+  font-size: 2.1rem;
+  font-weight: bold;
+  fill: #fff;
+  font-family: 'Noto Sans JP', 'Helvetica Neue', Arial, sans-serif;
+  opacity: 0.92;
+}
+
+.tooltip {
+  position: fixed;
+  z-index: 10;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  padding: 8;
+  min-width: 320;
+}
+
