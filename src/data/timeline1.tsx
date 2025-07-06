@@ -9,31 +9,31 @@ export const timelineData: TimelineItem[] = [
   {
     id: 1,
     date: "1983-05-28",
-    work: "てんコミ大長編鬼岩城",
+    work: "大長編ドラえもん のび太の海底鬼岩城 (てんとう虫コミックス)",
     url: "https://twitter.com/uBTpfEAU2cEZucx/status/1918816524514505130",
   },
   {
     id: 2,
     date: "1983-05-28",
-    work: "てんコミ大長編鬼岩城",
+    work: "大長編ドラえもん のび太の海底鬼岩城 (てんとう虫コミックス)",
     url: "https://twitter.com/uBTpfEAU2cEZucx/status/1941308279805931838",
   },
   {
     id: 3,
     date: "1983-05-28",
-    work: "てんコミ大長編鬼岩城",
+    work: "大長編ドラえもん のび太の海底鬼岩城 (てんとう虫コミックス)",
     url: "https://twitter.com/uBTpfEAU2cEZucx/status/1940938557465809207",
   },
   {
     id: 4,
     date: "1983-05-28",
-    work: "てんコミ大長編鬼岩城",
+    work: "大長編ドラえもん のび太の海底鬼岩城 (てんとう虫コミックス)",
     url: "https://twitter.com/uBTpfEAU2cEZucx/status/1940583974541447186",
   },
   {
     id: 5,
     date: "1983-05-28",
-    work: "てんコミ大長編鬼岩城",
+    work: "大長編ドラえもん のび太の海底鬼岩城 (てんとう虫コミックス)",
     url: "https://twitter.com/uBTpfEAU2cEZucx/status/1939864099556663519",
   },
   {

@@ -175,8 +175,8 @@ const Timeline: React.FC = () => {
   const hoveredData = timelineData.find((d) => d.id === hoveredId);
 
   return (
-    <div style={{ position: "relative", width: 500, height: 600, margin: "0 auto" }}>
-      <svg ref={svgRef} width={500} height={600} />
+    <div style={{ position: "relative", width: 800, margin: "0 auto" }}>
+      <svg ref={svgRef} width={800} height={800} />
       {hoveredData && hoverPos && (
         <div
           className="tooltip"
