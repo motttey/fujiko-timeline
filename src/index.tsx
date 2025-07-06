@@ -136,7 +136,7 @@ const Timeline: React.FC = () => {
           .selectAll(".tick text")
           .attr("font-size", "2.1rem")
           .attr("font-weight", "bold")
-          .attr("fill", "#222")
+          .attr("fill", "#fff")
           .attr("font-family", "'Noto Sans JP', 'Helvetica Neue', Arial, sans-serif")
           .attr("opacity", 0.92)
       )

@@ -1,3 +1,7 @@
+body {
+  background-color: #333333;
+}
+
 /* タイムライン全体を中央寄せ */
 .timeline-container {
   display: flex;
@@ -52,7 +56,7 @@
 /* ノード横のテキスト */
 .timeline-label {
   font-size: 1.1rem;
-  color: #333;
+  color: #fff;
   margin-left: 16px;
   white-space: nowrap;
 }
