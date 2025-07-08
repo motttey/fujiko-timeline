@@ -47,8 +47,9 @@ const Timeline: React.FC = () => {
           }
         );
         const data = await response.json();
-        const values = data.values.slice(1); // ヘッダーをスキップ
-        const formattedData: TimelineItem[] = values.map((row: any, index: number) => ({
+        // ヘッダーをスキップ
+        const values = data.values.slice(1);
+        const formattedData: TimelineItem[] = values.map((row: Array<string | number>, index: number) => ({
           id: index,
           date: row[1],
           work: row[2],
@@ -56,6 +57,7 @@ const Timeline: React.FC = () => {
         }));
         setTimelineData(formattedData);
       } catch (error) {
+        // TODO: 表示系に反映
         console.error("Error fetching data from Google Sheets:", error);
       }
     };
