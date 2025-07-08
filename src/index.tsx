@@ -12,7 +12,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import * as d3 from "d3";
 import "./style.css";
-import { timelineData, TimelineItem } from "./data/timeline1";
+import { TimelineItem } from "./data/timeline1";
 
 // Twitter埋め込みスクリプト
 const loadTwitterScript = () => {
@@ -31,10 +31,40 @@ const dotGap = 36;
 
 const Timeline: React.FC = () => {
   const svgRef = useRef<SVGSVGElement | null>(null);
+  const [timelineData, setTimelineData] = useState<TimelineItem[]>([]);
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SHEET_ID}/values/sheet?key=${process.env.API_KEY}`,
+          {
+            headers: {
+              "User-Agent": "Mozilla/5.0",
+            },
+          }
+        );
+        const data = await response.json();
+        const values = data.values.slice(1); // ヘッダーをスキップ
+        const formattedData: TimelineItem[] = values.map((row: any, index: number) => ({
+          id: index,
+          date: row[1],
+          work: row[2],
+          url: row[3],
+        }));
+        setTimelineData(formattedData);
+      } catch (error) {
+        console.error("Error fetching data from Google Sheets:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (timelineData.length === 0) return;
     const margin = { top: 40, right: 40, bottom: 40, left: 240 };
     const height = 600;
 
@@ -157,7 +187,7 @@ const Timeline: React.FC = () => {
           .text(work);
       });
     });
-  }, []);
+  }, [timelineData]);
 
   // Twitter埋め込みスクリプトのロード
   useEffect(() => {
