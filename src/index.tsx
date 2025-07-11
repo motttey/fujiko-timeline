@@ -38,27 +38,11 @@ const Timeline: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SHEET_ID}/values/sheet?key=${process.env.API_KEY}`,
-          {
-            headers: {
-              "User-Agent": "Mozilla/5.0",
-            },
-          }
-        );
+        const response = await fetch('/timeline-data.json');
         const data = await response.json();
-        // ヘッダーをスキップ
-        const values = data.values.slice(1);
-        const formattedData: TimelineItem[] = values.map((row: Array<string | number>, index: number) => ({
-          id: index,
-          date: row[1],
-          work: row[2],
-          url: row[3],
-        }));
-        setTimelineData(formattedData);
+        setTimelineData(data);
       } catch (error) {
-        // TODO: 表示系に反映
-        console.error("Error fetching data from Google Sheets:", error);
+        console.error("Error fetching data from local JSON:", error);
       }
     };
 

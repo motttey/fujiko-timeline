@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "prestart": "node scripts/fetch-data.js",
     "start": "webpack-dev-server --mode development --hot",
+    "prebuild": "node scripts/fetch-data.js",
     "build": "webpack --mode production"
   },
   "keywords": [],
@@ -13,8 +15,10 @@
   "devDependencies": {
     "@types/d3": "^7.4.3",
     "css-loader": "^7.1.2",
+    "dotenv": "^17.2.0",
     "dotenv-webpack": "^8.1.1",
     "html-webpack-plugin": "^5.6.3",
+    "node-fetch": "^2.7.0",
     "style-loader": "^4.0.0",
     "ts-loader": "^9.5.2",
     "typescript": "^5.8.2",

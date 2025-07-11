@@ -8,7 +8,7 @@ module.exports = {
   entry: './src/index.tsx',
   devtool: 'inline-source-map',
   devServer: {
-    static: './dist',
+    static: ['./dist', './public'],
   },
   module: {
     rules: [
