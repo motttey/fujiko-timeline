@@ -28,6 +28,9 @@ const loadTwitterScript = () => {
 
 const dotRadius = 13;
 const dotGap = 36;
+const margin = { top: 40, right: 40, bottom: 40, left: 240 };
+const height = 600;
+const width = 800;
 
 const Timeline: React.FC = () => {
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -51,8 +54,6 @@ const Timeline: React.FC = () => {
 
   useEffect(() => {
     if (timelineData.length === 0) return;
-    const margin = { top: 40, right: 40, bottom: 40, left: 240 };
-    const height = 600;
 
     // SVG初期化
     const svg = d3.select(svgRef.current);
@@ -126,7 +127,7 @@ const Timeline: React.FC = () => {
         const y = yScaleMulti(`${year}-${work}`)!;
 
         // ドット描画（改行対応）
-        const maxDotsPerLine = Math.floor((500 - margin.left) / dotGap);
+        const maxDotsPerLine = Math.floor((width - margin.left) / dotGap);
         items.forEach((item, i) => {
           const lineIndex = Math.floor(i / maxDotsPerLine);
           const posInLine = i % maxDotsPerLine;
@@ -191,8 +192,8 @@ const Timeline: React.FC = () => {
   const hoveredData = timelineData.find((d) => d.id === hoveredId);
 
   return (
-    <div style={{ position: "relative", width: 800, margin: "0 auto" }}>
-      <svg ref={svgRef} width={800} height={800} />
+    <div style={{ position: "relative", width: width, margin: "0 auto" }}>
+      <svg ref={svgRef} width={width} height={height} />
       {hoveredData && hoverPos && (
         <div
           className="tooltip"
