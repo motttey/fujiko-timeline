@@ -12,7 +12,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import * as d3 from "d3";
 import "./style.css";
-import { TimelineItem } from "./data/timeline1";
+import { backgroundImagePath, TimelineItem } from "./data/timeline1";
 
 // Twitter埋め込みスクリプト
 const loadTwitterScript = () => {
@@ -31,6 +31,18 @@ const dotGap = 36;
 const margin = { top: 40, right: 40, bottom: 40, left: 240 };
 const height = 600;
 const width = 800;
+
+function getAccountFromUrl(urlString: string) {
+  try {
+    const u = new URL(urlString);
+    const segments = u.pathname.split('/').filter(Boolean);
+    // Twitterの場合、1番目のセグメントがアカウント名
+    return segments[0] || null;
+  } catch (e) {
+    console.error("URL parsing error:", e);
+    return null;
+  }
+}
 
 const Timeline: React.FC = () => {
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -58,6 +70,8 @@ const Timeline: React.FC = () => {
     // SVG初期化
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
+
+    const defs = svg.append("defs");
 
     // 年リストを抽出し昇順ソート
     const years = Array.from(
@@ -122,6 +136,23 @@ const Timeline: React.FC = () => {
       .range([margin.top, height - margin.bottom])
       .padding(0.5);
 
+    const accounts = new Set(timelineData.map(item => getAccountFromUrl(item.url)).filter((x): x is string => !!x));
+    accounts.forEach(account => {
+        const patternId = `node-bg-${account}`;
+        defs
+            .append("pattern")
+            .attr("id", patternId)
+            .attr("patternUnits", "objectBoundingBox")
+            .attr("width", 1)
+            .attr("height", 1)
+            .append("image")
+            .attr("xlink:href", (backgroundImagePath as {[key: string]: string})[account])
+            .attr("width", dotRadius * 2)
+            .attr("height", dotRadius * 2)
+            .attr("x", 0)
+            .attr("y", 0);
+    });
+
     groupedByYearAndWork.forEach((workMap, year) => {
       workMap.forEach((items, work) => {
         const y = yScaleMulti(`${year}-${work}`)!;
@@ -129,6 +160,9 @@ const Timeline: React.FC = () => {
         // ドット描画（改行対応）
         const maxDotsPerLine = Math.floor((width - margin.left) / dotGap);
         items.forEach((item, i) => {
+          const account = getAccountFromUrl(item.url);
+          const patternId = `node-bg-${account}`;
+
           const lineIndex = Math.floor(i / maxDotsPerLine);
           const posInLine = i % maxDotsPerLine;
           const offsetX = posInLine * dotGap;
@@ -139,7 +173,7 @@ const Timeline: React.FC = () => {
             .attr("cx", margin.left + offsetX)
             .attr("cy", y + offsetY)
             .attr("r", dotRadius)
-            .attr("fill", "#1da1f2")
+            .attr("fill", `url(#${patternId})`)
             .attr("stroke", "#fff")
             .attr("stroke-width", 2)
             .style("cursor", "pointer")

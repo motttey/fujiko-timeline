@@ -5,6 +5,14 @@ export type TimelineItem = {
   url: string;
 };
 
+export interface BackgroundImagePath {
+  [key: string]: string;
+}
+
+export const backgroundImagePath: BackgroundImagePath = {
+  "uBTpfEAU2cEZucx": "https://pbs.twimg.com/profile_images/1246044432006168577/-kA1KKDu_400x400.jpg"
+}
+
 export const timelineData: TimelineItem[] = [
   {
     id: 1,
