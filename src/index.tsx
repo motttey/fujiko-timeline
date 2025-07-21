@@ -30,7 +30,7 @@ const loadTwitterScript = () => {
 const dotRadius = 13;
 const dotGap = 36;
 const margin = { top: 40, right: 40, bottom: 40, left: 240 };
-const height = 600;
+const minHeight = 600;
 const width = 800;
 
 const Timeline: React.FC = () => {
@@ -71,7 +71,7 @@ const Timeline: React.FC = () => {
     const yScale = d3
       .scalePoint<string>()
       .domain(years)
-      .range([margin.top, height - margin.bottom])
+      .range([margin.top, minHeight - margin.bottom])
       .padding(0.5);
 
     // 年ラベル用のカスタム軸
@@ -93,7 +93,7 @@ const Timeline: React.FC = () => {
       .attr("x1", margin.left - dotGap)
       .attr("x2", margin.left - dotGap)
       .attr("y1", margin.top)
-      .attr("y2", height - margin.bottom)
+      .attr("y2", minHeight - margin.bottom)
       .attr("stroke", "#fff")
       .attr("stroke-width", 6)
       .attr("opacity", 0.85);
@@ -111,8 +111,17 @@ const Timeline: React.FC = () => {
     // y軸の行数を計算
     let totalRows = 0;
     groupedByYearAndWork.forEach((workMap) => {
-      totalRows += workMap.size;
+      workMap.forEach((items) => {
+        const maxDotsPerLine = Math.floor((width - margin.left) / dotGap);
+        totalRows += Math.ceil(items.length / maxDotsPerLine);
+      });
     });
+
+    const rowHeight = 80;
+    const dynamicHeight = totalRows * rowHeight + margin.top + margin.bottom;
+    const height = Math.max(minHeight, dynamicHeight);
+
+    svg.attr("height", height);
 
     // yスケールを行数に合わせて再設定
     const yScaleMulti = d3
@@ -124,6 +133,9 @@ const Timeline: React.FC = () => {
       )
       .range([margin.top, height - margin.bottom])
       .padding(0.5);
+
+    // 縦線のy2を更新
+    svg.select(".verticalLine").attr("y2", height - margin.bottom);
 
     const accounts = new Set(timelineData.map(item => getAccountFromUrl(item.url)).filter((x): x is string => !!x));
     accounts.forEach(account => {
@@ -216,7 +228,7 @@ const Timeline: React.FC = () => {
 
   return (
     <div style={{ position: "relative", width: width, margin: "0 auto" }}>
-      <svg ref={svgRef} width={width} height={height} />
+      <svg ref={svgRef} width={width} />
       {hoveredData && hoverPos && (
         <div
           className="tooltip"
@@ -229,9 +241,9 @@ const Timeline: React.FC = () => {
             setHoverPos(null);
           }}
         >
-          <div className="twitter-tweet">
+          <blockquote className="twitter-tweet">
             <a href={hoveredData.url}></a>
-          </div>
+          </blockquote>
         </div>
       )}
     </div>
