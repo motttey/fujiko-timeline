@@ -13,6 +13,7 @@ import { createRoot } from "react-dom/client";
 import * as d3 from "d3";
 import "./style.css";
 import { backgroundImagePath, TimelineItem } from "./data/timeline1";
+import { getAccountFromUrl } from "./lib/url";
 
 // Twitter埋め込みスクリプト
 const loadTwitterScript = () => {
@@ -31,18 +32,6 @@ const dotGap = 36;
 const margin = { top: 40, right: 40, bottom: 40, left: 240 };
 const height = 600;
 const width = 800;
-
-function getAccountFromUrl(urlString: string) {
-  try {
-    const u = new URL(urlString);
-    const segments = u.pathname.split('/').filter(Boolean);
-    // Twitterの場合、1番目のセグメントがアカウント名
-    return segments[0] || null;
-  } catch (e) {
-    console.error("URL parsing error:", e);
-    return null;
-  }
-}
 
 const Timeline: React.FC = () => {
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -240,9 +229,9 @@ const Timeline: React.FC = () => {
             setHoverPos(null);
           }}
         >
-          <blockquote className="twitter-tweet">
+          <div className="twitter-tweet">
             <a href={hoveredData.url}></a>
-          </blockquote>
+          </div>
         </div>
       )}
     </div>
