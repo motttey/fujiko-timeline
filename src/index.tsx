@@ -30,8 +30,10 @@ const loadTwitterScript = () => {
 const dotRadius = 13;
 const dotGap = 36;
 const margin = { top: 40, right: 40, bottom: 40, left: 240 };
+const tooltipMargin = { x: 30, y: 60 };
 const minHeight = 600;
 const width = 800;
+const rowHeight = 80;
 
 const Timeline: React.FC = () => {
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -117,7 +119,6 @@ const Timeline: React.FC = () => {
       });
     });
 
-    const rowHeight = 80;
     const dynamicHeight = totalRows * rowHeight + margin.top + margin.bottom;
     const height = Math.max(minHeight, dynamicHeight);
 
@@ -178,7 +179,7 @@ const Timeline: React.FC = () => {
             .attr("stroke", "#fff")
             .attr("stroke-width", 2)
             .style("cursor", "pointer")
-            .on("mouseenter", function (_event: MouseEvent) {
+            .on("mouseenter", (_event: MouseEvent) => {
               setHoveredId(item.id);
               const rect = svgRef.current?.getBoundingClientRect();
               if (rect) {
@@ -233,8 +234,8 @@ const Timeline: React.FC = () => {
         <div
           className="tooltip"
           style={{
-            left: hoverPos.x + 30,
-            top: hoverPos.y - 60,
+            left: hoverPos.x + tooltipMargin.x,
+            top: hoverPos.y - tooltipMargin.y,
           }}
           onMouseLeave={() => {
             setHoveredId(null);
