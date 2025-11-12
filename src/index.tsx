@@ -195,9 +195,8 @@ const Timeline: React.FC = () => {
             });
         });
 
-        // workラベル表示（dotの右上に表示、複数行の場合はマージン調整）
         const labelX = margin.left - dotGap/2;
-        const labelY = y - dotGap; // dotの上に表示するため少し上にずらす
+        const labelY = y - dotGap;
         svg
           .append("text")
           .attr("class", "work-label")
