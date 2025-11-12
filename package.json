@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "prestart": "node scripts/fetch-data.js",
-    "start": "webpack-dev-server --mode development --hot",
+    "start": "webpack-dev-server --mode development",
     "prebuild": "node scripts/fetch-data.js",
     "build": "webpack --mode production"
   },
