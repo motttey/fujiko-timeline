@@ -236,10 +236,6 @@ const Timeline: React.FC = () => {
             left: hoverPos.x + tooltipMargin.x,
             top: hoverPos.y - tooltipMargin.y,
           }}
-          onMouseLeave={() => {
-            setHoveredId(null);
-            setHoverPos(null);
-          }}
         >
           <blockquote className="twitter-tweet">
             <a href={hoveredData.url}></a>
