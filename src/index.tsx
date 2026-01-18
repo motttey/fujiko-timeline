@@ -34,6 +34,8 @@ const tooltipMargin = { x: 30, y: 60 };
 const minHeight = 600;
 const width = 800;
 const rowHeight = 80;
+// workが同一なTimelineItem群を囲う外のpadding
+const workOutlinePadding = { x: 14, y: 8 };
 
 const Timeline: React.FC = () => {
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -159,8 +161,46 @@ const Timeline: React.FC = () => {
       workMap.forEach((items, work) => {
         const y = yScaleMulti(`${year}-${work}`)!;
 
-        // ドット描画（改行対応）
         const maxDotsPerLine = Math.floor((width - margin.left) / dotGap);
+        const lineCount = Math.ceil(items.length / maxDotsPerLine);
+
+        for (let lineIndex = 0; lineIndex < lineCount; lineIndex++) {
+          const lineItems = items.slice(
+            lineIndex * maxDotsPerLine,
+            (lineIndex + 1) * maxDotsPerLine
+          );
+          if (lineItems.length === 0) continue;
+
+          const yLine = y + lineIndex * (dotRadius * 2 + 10);
+
+          const xMin = margin.left;
+          const xMax = margin.left + (lineItems.length - 1) * dotGap;
+
+          const outlineX = xMin - dotRadius - workOutlinePadding.x;
+          const outlineY = yLine - dotRadius - workOutlinePadding.y;
+          const outlineHeight = dotRadius * 2 + workOutlinePadding.y * 2;
+          const outlineWidth =
+            (xMax - xMin) + dotRadius * 2 + workOutlinePadding.x * 2;
+
+          // 左右が円形になるよう、角丸は高さの半分に揃える
+          const pillRadius = outlineHeight / 2;
+
+          svg
+            .append("rect")
+            .attr("class", "work-outline")
+            .attr("x", outlineX)
+            .attr("y", outlineY)
+            .attr("width", outlineWidth)
+            .attr("height", outlineHeight)
+            .attr("rx", pillRadius)
+            .attr("ry", pillRadius)
+            .attr("fill", "rgba(255,255,255,0.1)")
+            .attr("stroke", "rgba(255,255,255,0.5)")
+            .attr("stroke-width", 1.5)
+            .attr("pointer-events", "none");
+        }
+
+        // ドット描画（改行対応）
         items.forEach((item, i) => {
           const account = getAccountFromUrl(item.url);
           const patternId = `node-bg-${account}`;
