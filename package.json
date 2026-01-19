@@ -1,7 +1,7 @@
 {
   "name": "fujiko-timeline",
   "version": "1.0.0",
-  "description": "",
+  "description": "藤子不二雄先生に関する出来事を時系列で表示するWebアプリケーション",
   "main": "index.js",
   "scripts": {
     "prestart": "node scripts/fetch-data.js",
@@ -10,8 +10,8 @@
     "build": "webpack --mode production"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "motttey",
+  "license": "MIT",
   "devDependencies": {
     "@types/d3": "^7.4.3",
     "css-loader": "^7.1.2",
